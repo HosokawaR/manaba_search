@@ -1,0 +1,25 @@
+{
+  "name": "manaba検索",
+  "version": "0.0.1",
+  "manifest_version": 2,
+  "description": "manaba内部を全文検索する",
+  //   "icons": {
+  //     "16": "images/icon-16.png",
+  //     "128": "images/icon-128.png"
+  //   },
+  "permissions": [
+    "tabs",
+    "https://manaba.tsukuba.ac.jp/*",
+    "http://localhost:7021/*",
+    "background",
+    "storage"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://manaba.tsukuba.ac.jp/ct/course_*"],
+      "js": ["js/jquery-3.5.1.js", "js/contentscript.js"]
+    }
+  ],
+  "background": { "scripts": ["js/hot-reload.js", "js/background.js"] },
+  "web_accessible_resources": ["img/search_icon.png"]
+}
