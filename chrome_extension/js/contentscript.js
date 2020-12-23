@@ -40,6 +40,7 @@ window.onload = function () {
     if (e.keyCode !== 13) {
       return;
     }
+    $('#search_results').empty();
     $.ajax({
       type: 'post',
       url: 'http://localhost:7021/search',
@@ -50,17 +51,26 @@ window.onload = function () {
       contentType: 'application/json',
       dataType: 'json',
       success: function (json_data) {
-        $('#search_results').empty();
-        for (const row of json_data.results) {
+        if (json_data.results.length > 0) {
+          for (const row of json_data.results) {
+            $('#search_results').append(`
+              <div style="
+                padding: .5rem 0;
+                border-top: 1px solid #ddd;
+                ">
+                <a href="${row.url}" target="blank" style="font-size: 1rem">${row.title}</a><br>
+                …${replaceMarker(row.highlights.join('…<br>…'))}…
+              </div>
+            `);
+          }
+        } else {
           $('#search_results').append(`
-            <div style="
-              padding: .5rem 0;
-              border-top: 1px solid #ddd;
+              <div style="
+                color: red;
               ">
-              <a href="${row.url}" target="blank" style="font-size: 1rem">${row.title}</a><br>
-              …${replaceMarker(row.highlights.join('…<br>…'))}…
-            </div>
-          `);
+                見つかりませんでした。
+              </div>
+            `);
         }
         let dateTime = new Date(json_data.crawling_time * 1000);
         $('#last-crawling-time').text(
