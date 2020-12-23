@@ -1,13 +1,14 @@
 import pickle
+from time import sleep, time
 
 from anytree import Node, RenderTree
 from selenium import webdriver
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
-from time import sleep
+from tqdm import tqdm
 
-from config.password import ID, PASSWORD
 from config.config import SLEEP_TIME
+from config.password import ID, PASSWORD
 
 driver = webdriver.Chrome(
     executable_path='/mnt/d/works/manaba_search/driver/chromedriver.exe')
@@ -22,8 +23,8 @@ wait.until(EC.title_contains('manaba'))
 
 root = Node('root', parent=None, url=driver.current_url)
 
-for course_url, course_text in [(l.get_attribute('href'), l.text) for l in
-                                driver.find_elements_by_css_selector('.courselist-title > a')]:
+for course_url, course_text in tqdm([(l.get_attribute('href'), l.text) for l in
+                                     driver.find_elements_by_css_selector('.courselist-title > a')], desc="コースをスキャン中"):
     # コーストップページ
     driver.get(course_url)
     course_top = Node(course_text, parent=root, url=driver.current_url)
@@ -73,7 +74,7 @@ for course_url, course_text in [(l.get_attribute('href'), l.text) for l in
 tree = RenderTree(root)
 print(tree)
 
-with open('data/manaba.pickle', 'wb') as f:
+with open(f'data/manaba_{int(time())}.pickle', 'wb') as f:
     pickle.dump(tree, f)
 
 driver.quit()

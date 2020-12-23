@@ -1,10 +1,16 @@
 import pickle
+from glob import glob
 
 from highlight import highlight
+import re
 
 
 def search(course_name, keyword):
-    with open('data/manaba.pickle', 'rb') as f:
+    files = glob('./data/*')
+    filename = sorted(files)[-1]
+    print(filename)
+    crawling_time = re.search(r'[0-9]+', filename)
+    with open(filename, 'rb') as f:
         tree = pickle.load(f)
         results = []
         for pre, fill, node in tree:
@@ -14,6 +20,7 @@ def search(course_name, keyword):
                     results.append({
                         'highlights': res,
                         'url': node.url,
-                        'title': node.name
+                        'title': node.name,
+                        'crawling_time': crawling_time
                     })
         return results

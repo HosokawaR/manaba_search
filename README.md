@@ -26,6 +26,7 @@ pip install Node
 pip install anytree
 pip install flask
 pip install flask_cors
+pip install tqdm
 ```
 
 ## パスワードを記録
