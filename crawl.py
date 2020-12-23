@@ -4,13 +4,15 @@ from anytree import Node, RenderTree
 from selenium import webdriver
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
+from time import sleep
 
 from config.password import ID, PASSWORD
+from config.config import SLEEP_TIME
 
-driver = webdriver.Chrome(executable_path='/mnt/d/works/manaba_search/driver/chromedriver.exe')
+driver = webdriver.Chrome(
+    executable_path='/mnt/d/works/manaba_search/driver/chromedriver.exe')
 driver.set_window_position(-1920 / 2, 0)
 wait = WebDriverWait(driver, 10)
-driver.implicitly_wait(0.5)
 driver.get('https://manaba.tsukuba.ac.jp/ct/home')
 wait.until(EC.title_contains('統一認証システム'))
 driver.find_element_by_id('username').send_keys(ID)
@@ -26,24 +28,29 @@ for course_url, course_text in [(l.get_attribute('href'), l.text) for l in
     driver.get(course_url)
     course_top = Node(course_text, parent=root, url=driver.current_url)
     wait.until(EC.title_contains('manaba - course'))
+    sleep(SLEEP_TIME)
     # コンテンツ一覧ページ
     driver.get(course_url + '_page')
     wait.until(EC.title_contains('manaba - course'))
+    sleep(SLEEP_TIME)
     for content_url, content_text in [(l.get_attribute('href'), l.text) for l in
                                       driver.find_elements_by_css_selector('.about-contents > div > a')]:
         # コンテンツ一覧ページ
         driver.get(content_url)
         wait.until(EC.title_contains('manaba - page'))
+        sleep(SLEEP_TIME)
         for page_url, page_text in [(l.get_attribute('href'), l.text) for l in
                                     driver.find_elements_by_css_selector('.GRIread > a')]:
             driver.get(page_url)
             wait.until(EC.title_contains('manaba - page'))
+            sleep(SLEEP_TIME)
             Node(page_text, parent=course_top, url=driver.current_url,
                  content=driver.find_element_by_class_name('contentbody-left').text)
 
     # コースニュース一覧ページ
     driver.get(course_url + '_news')
     wait.until(EC.title_contains('manaba - course'))
+    sleep(SLEEP_TIME)
     if driver.find_elements_by_class_name('description') and \
             'ニュースはありません。' in driver.find_element_by_class_name('description').text:
         continue
@@ -54,15 +61,18 @@ for course_url, course_text in [(l.get_attribute('href'), l.text) for l in
         # コンテンツページ
         driver.get(course_url + '_news' + f'?start={i * 10 + 1}&pagelen=10')
         wait.until(EC.title_contains('manaba - course'))
+        sleep(SLEEP_TIME)
         for news_url, news_text in [(l.get_attribute('href'), l.text) for l in
                                     driver.find_elements_by_css_selector('.newstext > a')]:
             driver.get(news_url)
             wait.until(EC.title_contains('manaba - course'))
+            sleep(SLEEP_TIME)
             Node(news_text, parent=course_top, url=driver.current_url,
                  content=driver.find_element_by_class_name('msg-text').text)
 
 tree = RenderTree(root)
 print(tree)
+
 with open('data/manaba.pickle', 'wb') as f:
     pickle.dump(tree, f)
 
