@@ -72,7 +72,6 @@ for course_url, course_text in tqdm([(l.get_attribute('href'), l.text) for l in
                  content=driver.find_element_by_class_name('msg-text').text)
 
 tree = RenderTree(root)
-print(tree)
 
 with open(f'data/manaba_{int(time())}.pickle', 'wb') as f:
     pickle.dump(tree, f)

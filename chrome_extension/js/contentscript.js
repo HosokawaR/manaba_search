@@ -14,12 +14,16 @@ window.onload = function () {
   const searchBoxHtml = `
     <input id="search_input" type="text" placeholder="コース内を検索" style="
       width: 20rem;
-      margin-right: auto;
+      margin-right: .5rem;
       padding: .3rem;
       padding-left: 2rem;
       border: 1px solid #999;
       border-radius: .2rem;
     ">
+    <div style="
+      margin-right: auto;
+      color: #555;
+    ">最終更新日時：<span id="last-crawling-time">不明</span></div>
     <img src="${chrome.extension.getURL('img/search_icon.png')}" style="
       position: absolute;
       width: 1rem;
@@ -46,13 +50,8 @@ window.onload = function () {
       contentType: 'application/json',
       dataType: 'json',
       success: function (json_data) {
-        if (!json_data[0]) {
-          alert('Transaction error. ');
-          console.log(json_data);
-          return;
-        }
         $('#search_results').empty();
-        for (const row of json_data) {
+        for (const row of json_data.results) {
           $('#search_results').append(`
             <div style="
               padding: .5rem 0;
@@ -63,6 +62,10 @@ window.onload = function () {
             </div>
           `);
         }
+        let dateTime = new Date(json_data.crawling_time * 1000);
+        $('#last-crawling-time').text(
+          `${dateTime.toLocaleDateString()} ${dateTime.toLocaleTimeString('ja-JP')}`
+        );
       },
       error: function () {
         alert('Server Error. Pleasy try again later.');
