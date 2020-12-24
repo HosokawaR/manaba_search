@@ -37,7 +37,8 @@ window.onload = function () {
   `);
   const courseName = document.getElementById('coursename').textContent;
   $(document).on('keyup', '#search_input', function (e) {
-    if (e.keyCode !== 13) {
+    const searchWord = $('#search_input').val();
+    if (e.keyCode !== 13 || searchWord === '') {
       return;
     }
     $('#search_results').empty();
@@ -46,7 +47,7 @@ window.onload = function () {
       url: 'http://localhost:7021/search',
       data: JSON.stringify({
         course_name: courseName,
-        keyword: $('#search_input').val(),
+        keyword: searchWord,
       }),
       contentType: 'application/json',
       dataType: 'json',
