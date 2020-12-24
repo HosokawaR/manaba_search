@@ -23,35 +23,43 @@ wait.until(EC.title_contains('manaba'))
 
 root = Node('root', parent=None, url=driver.current_url)
 
+
+def get_page(url):
+    sleep(SLEEP_TIME)
+    try:
+        driver.get(url)
+        return False
+    except:
+        print(f"エラーが発生しました。"
+              f"指定されたURL: {url}"
+              f"現在のドライバのURL: {driver.current_url}")
+        return True
+
+
 for course_url, course_text in tqdm([(l.get_attribute('href'), l.text) for l in
                                      driver.find_elements_by_css_selector('.courselist-title > a')], desc="コースをスキャン中"):
     # コーストップページ
-    driver.get(course_url)
+    if get_page(course_url): continue
     course_top = Node(course_text, parent=root, url=driver.current_url)
     wait.until(EC.title_contains('manaba - course'))
-    sleep(SLEEP_TIME)
     # コンテンツ一覧ページ
-    driver.get(course_url + '_page')
+    if get_page(course_url + '_page'): continue
     wait.until(EC.title_contains('manaba - course'))
-    sleep(SLEEP_TIME)
     for content_url, content_text in [(l.get_attribute('href'), l.text) for l in
                                       driver.find_elements_by_css_selector('.about-contents > div > a')]:
         # コンテンツ一覧ページ
-        driver.get(content_url)
+        if get_page(content_url): continue
         wait.until(EC.title_contains('manaba - page'))
-        sleep(SLEEP_TIME)
         for page_url, page_text in [(l.get_attribute('href'), l.text) for l in
                                     driver.find_elements_by_css_selector('.GRIread > a')]:
-            driver.get(page_url)
+            if get_page(page_url): continue
             wait.until(EC.title_contains('manaba - page'))
-            sleep(SLEEP_TIME)
             Node(page_text, parent=course_top, url=driver.current_url,
                  content=driver.find_element_by_class_name('contentbody-left').text)
 
     # コースニュース一覧ページ
-    driver.get(course_url + '_news')
+    if get_page(course_url + '_news'): continue
     wait.until(EC.title_contains('manaba - course'))
-    sleep(SLEEP_TIME)
     if driver.find_elements_by_class_name('description') and \
             'ニュースはありません。' in driver.find_element_by_class_name('description').text:
         continue
@@ -60,14 +68,12 @@ for course_url, course_text in tqdm([(l.get_attribute('href'), l.text) for l in
 
     for i in range(news_count // 10 + 1):
         # コンテンツページ
-        driver.get(course_url + '_news' + f'?start={i * 10 + 1}&pagelen=10')
+        if get_page(course_url + '_news' + f'?start={i * 10 + 1}&pagelen=10'): continue
         wait.until(EC.title_contains('manaba - course'))
-        sleep(SLEEP_TIME)
         for news_url, news_text in [(l.get_attribute('href'), l.text) for l in
                                     driver.find_elements_by_css_selector('.newstext > a')]:
-            driver.get(news_url)
+            if get_page(news_url): continue
             wait.until(EC.title_contains('manaba - course'))
-            sleep(SLEEP_TIME)
             Node(news_text, parent=course_top, url=driver.current_url,
                  content=driver.find_element_by_class_name('msg-text').text)
 
