@@ -77,6 +77,26 @@ for course_url, course_text in tqdm([(l.get_attribute('href'), l.text) for l in
             Node(news_text, parent=course_top, url=driver.current_url,
                  content=driver.find_element_by_class_name('msg-text').text)
 
+    # スレッド一覧ページ
+    if get_page(course_url + '_topics'): continue
+    wait.until(EC.title_contains('manaba - course'))
+    if driver.find_elements_by_class_name('description') and \
+            'スレッドはありません。' in driver.find_element_by_class_name('description').text:
+        continue
+    thread_count = int(driver.find_element_by_css_selector(
+        '.navigator > div:nth-child(2) > span:nth-child(1)').text.replace('全', '').replace('件', ''))
+
+    for i in range(thread_count // 10 + 1):
+        # スレッドページ
+        if get_page(course_url + '_topics' + f'?start={i * 10 + 1}&pagelen=10'): continue
+        wait.until(EC.title_contains('manaba - course'))
+        for thread_url, thread_text in [(l.get_attribute('href'), l.text) for l in
+                                        driver.find_elements_by_css_selector('.threadhead')]:
+            if get_page(thread_url): continue
+            wait.until(EC.title_contains('manaba - course'))
+            Node(thread_text, parent=course_top, url=driver.current_url,
+                 content=driver.find_element_by_class_name('threadV3').text)
+
 tree = RenderTree(root)
 
 with open(f'data/manaba_{int(time())}.pickle', 'wb') as f:
